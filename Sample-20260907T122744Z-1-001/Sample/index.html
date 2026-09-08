@@ -1,0 +1,2252 @@
+﻿<!doctype html>
+<html lang="en">
+  <marquee behavior="scroll" direction="left">
+    Welcome to the Ward Document System
+  </marquee>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>वडा कागजात प्रणाली</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="notosansdevanagari-font.js"></script>
+    <script src="devanagari-canvas-text.js"></script>
+    <script src="script.js"></script>
+  </head>
+  <body>
+    <!-- Login Screen -->
+    <div id="loginScreen">
+      <div class="container">
+        <div class="card login-card">
+          वडा कागजात प्रणाली जारी राख्न लगइन गर्नुहोस्
+          <div class="login-form">
+            <input type="text" id="username" placeholder="प्रयोगकर्ता नाम" />
+            <input type="password" id="password" placeholder="पासवर्ड" />
+            <button class="btn btn-primary login-btn" onclick="login()">
+              लगइन गर्नुहोस्
+            </button>
+          </div>
+          पूर्वनिर्धारित: admin / admin123
+        </div>
+      </div>
+    </div>
+    <!-- Main App -->
+    <div id="mainApp" class="hidden">
+      <header>
+        वडा कागजात प्रणाली
+        <div class="user-area">
+          <span id="userDisplay"></span>
+          <span class="logout-btn" onclick="logout()">बाहिर निस्कनुहोस्</span>
+        </div>
+      </header>
+      <!-- Dashboard -->
+      <div id="dashboard" class="dashboard">
+        वडा सेवामा स्वागत छ तयार गर्न चाहेको कागजात छान्नुहोस्
+        <div class="service-grid">
+          <div class="service-card" onclick="openService('birth')">
+            <h3>जन्म दर्ता प्रमाणपत्र</h3>
+            <p>Auto-fill parents from citizenship</p>
+          </div>
+          <div class="service-card" onclick="openService('death')">
+            <h3>मृत्यु प्रमाणपत्रमा</h3>
+            <p>Auto-fill deceased details</p>
+          </div>
+          <div class="service-card" onclick="openService('citizenship')">
+            <h3>नागरिकता सिफारिस पत्र</h3>
+            <p>Auto-fill applicant</p>
+          </div>
+          <div class="service-card" onclick="openService('marriage')">
+            <h3>विवाह दर्ता प्रमाणपत्र</h3>
+            <p>Auto-fill groom & bride</p>
+          </div>
+          <div class="service-card" onclick="openService('migration')">
+            <h3>बसाइँसराइ प्रमाणपत्र</h3>
+            <p>Auto-fill applicant</p>
+          </div>
+          <div class="service-card" onclick="openService('relationship')">
+            <h3>नाता प्रमाणपत्र</h3>
+            <p>Auto-fill relation details</p>
+          </div>
+          <div class="service-card" onclick="openService('income')">
+            <h3>आय प्रमाणपत्र</h3>
+            <p>Auto-fill income details</p>
+          </div>
+          <div class="service-card" onclick="openService('property')">
+            <h3>सम्पत्ति मूल्यांकन प्रमाणपत्र</h3>
+            <p>Auto-fill property owner</p>
+          </div>
+
+          <div class="service-card" onclick="openService('address')">
+            <h3>ठेगाना प्रमाणपत्र</h3>
+            <p>Auto-fill address proof</p>
+          </div>
+          <div class="service-card" onclick="openService('unmarried')">
+            <h3>अविवाहित प्रमाणपत्र</h3>
+            <p>Auto-fill single status</p>
+          </div>
+
+          <div class="service-card" onclick="openService('road')">
+            <h3>रोड नाप प्रमाणपत्र</h3>
+            <p>Auto-fill road name details</p>
+          </div>
+          <div class="service-card" onclick="openService('otherForm')">
+            <h3>अन्य सिफारिस पत्र</h3>
+            <p>Auto-fill applicant and recommendation details</p>
+          </div>
+        </div>
+      </div>
+      <!-- Service Pages Container -->
+      <div id="servicePages" class="hidden">
+        <!-- ==================== BIRTH PAGE ==================== -->
+        <!-- Birth Page -->
+        <div id="birthPage" class="service-page">
+          <button
+            class="btn btn-secondary back-btn"
+            onclick="backToDashboard()"
+          >
+            ← Cancel / Back
+          </button>
+          <h1>जन्म दर्ता प्रमाणपत्र</h1>
+
+          <div id="birthStep1" class="card">
+            <h2>1. Upload Father's Citizenship Card (Front & Back)</h2>
+            <div class="image-upload-area">
+              <label>Father Citizenship Front</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadBirthImage(event, 'fatherFront')"
+              />
+              <img
+                id="birthFatherFrontPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <div class="image-upload-area">
+              <label>Father Citizenship Back</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadBirthImage(event, 'fatherBack')"
+              />
+              <img
+                id="birthFatherBackPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <p class="upload-hint">Clear front-side photos recommended</p>
+            <button id="birthNextToMother" class="btn btn-primary" disabled>
+              Next: Upload Mother's Card
+            </button>
+          </div>
+
+          <div id="birthStep2" class="card hidden">
+            <h2>2. Upload Mother's Citizenship Card (Front & Back)</h2>
+            <div class="image-upload-area">
+              <label>Mother Citizenship Front</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadBirthImage(event, 'motherFront')"
+              />
+              <img
+                id="birthMotherFrontPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <div class="image-upload-area">
+              <label>Mother Citizenship Back</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadBirthImage(event, 'motherBack')"
+              />
+              <img
+                id="birthMotherBackPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <p class="upload-hint">Clear front-side photos recommended</p>
+            <button id="birthNextToNibidak" class="btn btn-primary" disabled>
+              Next: Nibidak Card
+            </button>
+          </div>
+
+          <div id="birthStep3" class="card hidden">
+            <h2>
+              3. Upload Nibidak Citizenship Card (Front & Back) - COMPULSORY
+            </h2>
+            <div class="image-upload-area">
+              <label>Nibidak Citizenship Front</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadBirthImage(event, 'nibidakFront')"
+              />
+              <img
+                id="birthNibidakFrontPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <div class="image-upload-area">
+              <label>Nibidak Citizenship Back</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadBirthImage(event, 'nibidakBack')"
+              />
+              <img
+                id="birthNibidakBackPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <p class="upload-hint">
+              Nibidak (Applicant) citizenship card is required
+            </p>
+            <button id="birthNextToOptionals" class="btn btn-primary" disabled>
+              Next: Optional Documents
+            </button>
+          </div>
+
+          <div id="birthStep4" class="card hidden">
+            <h2>4. Upload Optional Documents</h2>
+            <div class="image-upload-area">
+              <label>Hospital Card</label>
+              <input
+                type="file"
+                id="birthHospitalFileInput"
+                accept="image/*"
+                hidden
+                onchange="loadBirthImage(event, 'hospital')"
+              />
+              <button
+                class="btn btn-primary upload-btn"
+                onclick="
+                  document.getElementById('birthHospitalFileInput').click()
+                "
+              >
+                Choose Hospital Card
+              </button>
+              <img
+                id="birthHospitalPreview"
+                class="preview-image"
+                style="display: none"
+                alt="Hospital"
+              />
+            </div>
+            <p class="upload-hint">Optional. You can skip if not applicable.</p>
+            <button id="birthNextToOCR" class="btn btn-primary">
+              Proceed to Extract Information
+            </button>
+          </div>
+
+          <div id="birthStep5" class="card hidden">
+            <h2>5. Extract Parents Information (OCR)</h2>
+            <button
+              id="birthOcrButton"
+              class="btn btn-success ocr-btn"
+              onclick="runBirthOCR()"
+            >
+              🔍 Extract Parents Information (OCR)
+            </button>
+          </div>
+
+          <div id="birthStep6" class="card hidden">
+            <h2>6. Birth Registration Form</h2>
+            <div class="form-section">
+              <h3>Child Details (शिशुको विवरण) – Manual Entry</h3>
+              <div class="form-grid">
+                <div>
+                  <label>Child's Name (Nepali)</label
+                  ><input type="text" id="birthChildNameNep" required />
+                </div>
+                <div>
+                  <label>Child's Name (English)</label
+                  ><input type="text" id="birthChildNameEng" required />
+                </div>
+                <div>
+                  <label>Date of Birth (B.S.)</label
+                  ><input type="text" id="birthDobBS" required />
+                </div>
+                <div>
+                  <label>Gender</label
+                  ><select id="birthGender" required>
+                    <option value="">Select</option>
+                    <option>पुरुष</option>
+                    <option>महिला</option>
+                    <option>अन्य</option>
+                  </select>
+                </div>
+                <div>
+                  <label>Contact Number</label
+                  ><input type="number" id="birthContactNumber" required />
+                </div>
+                <div>
+                  <label>Tol</label
+                  ><input type="text" id="birthTolname" required />
+                </div>
+                <div class="full-width">
+                  <label>Place of Birth</label
+                  ><select id="birthPlace" required>
+                    <option value="">Select</option>
+                    <option>घर </option>
+                    <option>अस्पताल</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h3>Parents Details (अभिभावक विवरण) – Auto-filled</h3>
+              <div class="form-grid">
+                <div>
+                  <label>Father's Name (Nepali)</label
+                  ><input type="text" id="birthFatherNameNep" />
+                </div>
+                <div>
+                  <label>Father's Name (English)</label
+                  ><input type="text" id="birthFatherNameEng" />
+                </div>
+                <div>
+                  <label>Father's Citizenship No.</label
+                  ><input type="text" id="birthFatherCitizenshipNo" />
+                </div>
+                <div>
+                  <label>Mother's Name (Nepali)</label
+                  ><input type="text" id="birthMotherNameNep" />
+                </div>
+                <div>
+                  <label>Mother's Name (English)</label
+                  ><input type="text" id="birthMotherNameEng" />
+                </div>
+                <div>
+                  <label>Mother's Citizenship No.</label
+                  ><input type="text" id="birthMotherCitizenshipNo" />
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h3>Address & Ward (ठेगाना तथा वडा)</h3>
+              <div class="form-grid">
+                <div class="full-width">
+                  <label>Permanent Address</label
+                  ><textarea id="birthPermAddress" rows="2"></textarea>
+                </div>
+                <div>
+                  <label>नगरपालिका</label
+                  ><input
+                    type="text"
+                    id="birthMunicipality"
+                    value="हेटौडा उपमहानगरपालिका"
+                  />
+                </div>
+                <div>
+                  <label>Ward No.</label
+                  ><input type="text" id="birthWardNo" value="15" />
+                </div>
+                <div>
+                  <label>District</label
+                  ><input type="text" id="birthDistrict" value="मकवानपुर" />
+                </div>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button
+                class="btn btn-primary generate-btn"
+                onclick="generateBirthPDF()"
+              >
+                Generate Birth Certificate PDF →
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- ==================== DEATH PAGE ==================== -->
+        <!-- Death Page  -->
+        <div id="deathPage" class="service-page hidden">
+          <button
+            class="btn btn-secondary back-btn"
+            onclick="backToDashboard()"
+          >
+            ← Cancel / Back
+          </button>
+          <h1>मृत्यु प्रमाणपत्र</h1>
+
+          <div id="deathStep1" class="card">
+            <h2>1. Upload Deceased Citizenship (Front & Back)</h2>
+            <div class="image-upload-area">
+              <label>Citizenship Front</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadDeathImage(event, 'deceasedFront')"
+              />
+              <img
+                id="deathDeceasedFrontPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <div class="image-upload-area">
+              <label>Citizenship Back</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadDeathImage(event, 'deceasedBack')"
+              />
+              <img
+                id="deathDeceasedBackPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <button id="deathNextToNibidak" class="btn btn-primary" disabled>
+              Next: Nibidak Card
+            </button>
+          </div>
+
+          <div id="deathStep2" class="card hidden">
+            <h2>
+              2. Upload Nibidak Citizenship Card (Front & Back) - COMPULSORY
+            </h2>
+            <div class="image-upload-area">
+              <label>Nibidak Citizenship Front</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadDeathImage(event, 'nibidakFront')"
+              />
+              <img
+                id="deathNibidakFrontPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <div class="image-upload-area">
+              <label>Nibidak Citizenship Back</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadDeathImage(event, 'nibidakBack')"
+              />
+              <img
+                id="deathNibidakBackPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <p class="upload-hint">
+              Nibidak (Applicant) citizenship card is required
+            </p>
+            <button id="deathNextToOCR" class="btn btn-primary" disabled>
+              Next: OCR
+            </button>
+          </div>
+
+          <div id="deathStep3" class="card hidden">
+            <h2>3. Extract Information (OCR)</h2>
+            <div class="ocr-actions">
+              <button class="btn btn-success" onclick="runDeathOCR()">
+                🔍 Run OCR
+              </button>
+              <button
+                class="btn btn-secondary"
+                onclick="showServiceStep('death', 4)"
+              >
+                ✏️ Skip OCR → Fill Manually
+              </button>
+            </div>
+            <p class="skip-ocr-hint">
+              OCR auto-fills deceased details from uploaded card. You may skip
+              and enter details manually.
+            </p>
+          </div>
+
+          <div id="deathStep4" class="card hidden">
+            <h2>4. Death Registration Form</h2>
+            <div class="form-grid">
+              <div>
+                <label>Deceased Name</label
+                ><input type="text" id="deathDeceasedName" />
+              </div>
+              <div>
+                <label>Citizenship No</label
+                ><input type="text" id="deathDeceasedCitizenship" />
+              </div>
+              <div>
+                <label>Date of Death</label
+                ><input type="text" id="deathDateOfDeath" />
+              </div>
+              <div>
+                <label>Place of Death</label
+                ><input type="text" id="deathPlace" />
+              </div>
+              <div>
+                <label>Contact</label><input type="text" id="deathContact" />
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="generateDeathPDF()">
+              Generate Death PDF
+            </button>
+          </div>
+        </div>
+        <!-- ==================== CITIZENSHIP PAGE ==================== -->
+        <!-- citizenship form content here -->
+        <div id="citizenshipPage" class="service-page hidden">
+          <button
+            class="btn btn-secondary back-btn"
+            onclick="backToDashboard()"
+          >
+            ← Cancel / Back
+          </button>
+          <h1>नागरिकता सिफारिस पत्र</h1>
+
+          <div id="citizenshipStep1" class="card">
+            <h2>1. Upload Applicant Primary Citizenship (Front & Back)</h2>
+            <div class="image-upload-area">
+              <label>Citizenship Front</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadCitizenshipImage(event, 'primaryFront')"
+              />
+              <img
+                id="citizenshipPrimaryFrontPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <div class="image-upload-area">
+              <label>Citizenship Back</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadCitizenshipImage(event, 'primaryBack')"
+              />
+              <img
+                id="citizenshipPrimaryBackPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <button
+              id="citizenshipNextToNibidak"
+              class="btn btn-primary"
+              disabled
+            >
+              Next: Nibidak Card
+            </button>
+          </div>
+
+          <div id="citizenshipStep2" class="card hidden">
+            <h2>
+              2. Upload Nibidak Citizenship Card (Front & Back) - COMPULSORY
+            </h2>
+            <div class="image-upload-area">
+              <label>Nibidak Citizenship Front</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadCitizenshipImage(event, 'nibidakFront')"
+              />
+              <img
+                id="citizenshipNibidakFrontPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <div class="image-upload-area">
+              <label>Nibidak Citizenship Back</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadCitizenshipImage(event, 'nibidakBack')"
+              />
+              <img
+                id="citizenshipNibidakBackPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <p class="upload-hint">
+              Nibidak (Applicant) citizenship card is required
+            </p>
+            <button id="citizenshipNextToOCR" class="btn btn-primary" disabled>
+              Next: OCR
+            </button>
+          </div>
+
+          <div id="citizenshipStep3" class="card hidden">
+            <h2>3. Extract Information (OCR)</h2>
+            <div class="ocr-actions">
+              <button class="btn btn-success" onclick="runCitizenshipOCR()">
+                🔍 Run OCR
+              </button>
+              <button
+                class="btn btn-secondary"
+                onclick="showServiceStep('citizenship', 4)"
+              >
+                ✏️ Skip OCR → Fill Manually
+              </button>
+            </div>
+            <p class="skip-ocr-hint">
+              OCR auto-fills applicant details from uploaded card. You may skip
+              and enter details manually.
+            </p>
+          </div>
+
+          <div id="citizenshipStep4" class="card hidden">
+            <h2>4. Citizenship Details Form</h2>
+            <div class="form-grid">
+              <div>
+                <label>Name (Nepali)</label
+                ><input type="text" id="citizenshipNameNep" />
+              </div>
+              <div>
+                <label>Name (English)</label
+                ><input type="text" id="citizenshipNameEng" />
+              </div>
+              <div>
+                <label>Citizenship No</label
+                ><input type="text" id="citizenshipCitNo" />
+              </div>
+              <div>
+                <label>Date of Issue</label
+                ><input type="text" id="citizenshipDateIssue" />
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="generateCitizenshipPDF()">
+              Generate Citizenship PDF
+            </button>
+          </div>
+        </div>
+        <!-- ==================== MARRIAGE PAGE ==================== -->
+        <!-- marriagePage -->
+        <div id="marriagePage" class="service-page hidden">
+          <button
+            class="btn btn-secondary back-btn"
+            onclick="backToDashboard()"
+          >
+            ← Cancel / Back
+          </button>
+          <h1>विवाह दर्ता प्रमाणपत्र</h1>
+
+          <div id="marriageStep1" class="card">
+            <h2>1. Upload Groom's Citizenship (Front & Back)</h2>
+            <div class="image-upload-area">
+              <label>Citizenship Front</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadMarriageImage(event, 'groomFront')"
+              />
+              <img
+                id="marriageGroomFrontPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <div class="image-upload-area">
+              <label>Citizenship Back</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadMarriageImage(event, 'groomBack')"
+              />
+              <img
+                id="marriageGroomBackPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <button id="marriageNextToBride" class="btn btn-primary" disabled>
+              Next: Upload Bride's Card
+            </button>
+          </div>
+
+          <div id="marriageStep2" class="card hidden">
+            <h2>2. Upload Bride's Citizenship (Front & Back)</h2>
+            <div class="image-upload-area">
+              <label>Citizenship Front</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadMarriageImage(event, 'brideFront')"
+              />
+              <img
+                id="marriageBrideFrontPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <div class="image-upload-area">
+              <label>Citizenship Back</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadMarriageImage(event, 'brideBack')"
+              />
+              <img
+                id="marriageBrideBackPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <button id="marriageNextToNibidak" class="btn btn-primary" disabled>
+              Next: Nibidak Card
+            </button>
+          </div>
+
+          <div id="marriageStep3" class="card hidden">
+            <h2>
+              3. Upload Nibidak Citizenship Card (Front & Back) - COMPULSORY
+            </h2>
+            <div class="image-upload-area">
+              <label>Nibidak Citizenship Front</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadMarriageImage(event, 'nibidakFront')"
+              />
+              <img
+                id="marriageNibidakFrontPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <div class="image-upload-area">
+              <label>Nibidak Citizenship Back</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadMarriageImage(event, 'nibidakBack')"
+              />
+              <img
+                id="marriageNibidakBackPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <p class="upload-hint">
+              Nibidak (Applicant) citizenship card is required
+            </p>
+            <button id="marriageNextToOCR" class="btn btn-primary" disabled>
+              Next: OCR
+            </button>
+          </div>
+
+          <div id="marriageStep4" class="card hidden">
+            <h2>4. Extract Information (OCR)</h2>
+            <div class="ocr-actions">
+              <button class="btn btn-success" onclick="runMarriageOCR()">
+                🔍 Run OCR
+              </button>
+              <button
+                class="btn btn-secondary"
+                onclick="showServiceStep('marriage', 5)"
+              >
+                ✏️ Skip OCR → Fill Manually
+              </button>
+            </div>
+            <p class="skip-ocr-hint">
+              OCR auto-fills groom &amp; bride details from uploaded cards. You
+              may skip and enter details manually.
+            </p>
+          </div>
+
+          <div id="marriageStep5" class="card hidden">
+            <h2>5. Marriage Registration Form</h2>
+            <div class="form-grid">
+              <div>
+                <label>Groom Name (Nepali)</label
+                ><input type="text" id="marriageGroomNameNep" />
+              </div>
+              <div>
+                <label>Groom Name (English)</label
+                ><input type="text" id="marriageGroomNameEng" />
+              </div>
+              <div>
+                <label>Groom Citizenship No</label
+                ><input type="text" id="marriageGroomCitNo" />
+              </div>
+              <div>
+                <label>Bride Name (Nepali)</label
+                ><input type="text" id="marriageBrideNameNep" />
+              </div>
+              <div>
+                <label>Bride Name (English)</label
+                ><input type="text" id="marriageBrideNameEng" />
+              </div>
+              <div>
+                <label>Bride Citizenship No</label
+                ><input type="text" id="marriageBrideCitNo" />
+              </div>
+              <div>
+                <label>Marriage Date</label
+                ><input type="text" id="marriageDate" />
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="generateMarriagePDF()">
+              Generate Marriage Certificate PDF
+            </button>
+          </div>
+        </div>
+        <!-- ==================== DIVORCE PAGE ==================== -->
+        <!--divorce -->
+        <div id="divorcePage" class="service-page hidden">
+          <button
+            class="btn btn-secondary back-btn"
+            onclick="backToDashboard()"
+          >
+            ← Cancel / Back
+          </button>
+          <h1>विवाह विच्छेद दर्ता प्रमाणपत्र</h1>
+
+          <div id="divorceStep1" class="card">
+            <h2>1. Upload Husband's Citizenship (Front & Back)</h2>
+            <div class="image-upload-area">
+              <label>Citizenship Front</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadDivorceImage(event, 'husbandFront')"
+              />
+              <img
+                id="divorceHusbandFrontPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <div class="image-upload-area">
+              <label>Citizenship Back</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadDivorceImage(event, 'husbandBack')"
+              />
+              <img
+                id="divorceHusbandBackPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <button id="divorceNextToWife" class="btn btn-primary" disabled>
+              Next: Upload Wife's Card
+            </button>
+          </div>
+
+          <div id="divorceStep2" class="card hidden">
+            <h2>2. Upload Wife's Citizenship (Front & Back)</h2>
+            <div class="image-upload-area">
+              <label>Citizenship Front</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadDivorceImage(event, 'wifeFront')"
+              />
+              <img
+                id="divorceWifeFrontPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <div class="image-upload-area">
+              <label>Citizenship Back</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadDivorceImage(event, 'wifeBack')"
+              />
+              <img
+                id="divorceWifeBackPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <button id="divorceNextToNibidak" class="btn btn-primary" disabled>
+              Next: Nibidak Card
+            </button>
+          </div>
+
+          <div id="divorceStep3" class="card hidden">
+            <h2>
+              3. Upload Nibidak Citizenship Card (Front & Back) - COMPULSORY
+            </h2>
+            <div class="image-upload-area">
+              <label>Nibidak Citizenship Front</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadDivorceImage(event, 'nibidakFront')"
+              />
+              <img
+                id="divorceNibidakFrontPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <div class="image-upload-area">
+              <label>Nibidak Citizenship Back</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadDivorceImage(event, 'nibidakBack')"
+              />
+              <img
+                id="divorceNibidakBackPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <p class="upload-hint">
+              Nibidak (Applicant) citizenship card is required
+            </p>
+            <button id="divorceNextToOCR" class="btn btn-primary" disabled>
+              Next: OCR
+            </button>
+          </div>
+
+          <div id="divorceStep4" class="card hidden">
+            <h2>4. Extract Information (OCR)</h2>
+            <div class="ocr-actions">
+              <button class="btn btn-success" onclick="runDivorceOCR()">
+                🔍 Run OCR
+              </button>
+              <button
+                class="btn btn-secondary"
+                onclick="showServiceStep('divorce', 5)"
+              >
+                ✏️ Skip OCR → Fill Manually
+              </button>
+            </div>
+            <p class="skip-ocr-hint">
+              OCR auto-fills husband &amp; wife details from uploaded cards. You
+              may skip and enter details manually.
+            </p>
+          </div>
+
+          <div id="divorceStep5" class="card hidden">
+            <h2>5. Divorce Registration Form</h2>
+            <div class="form-grid">
+              <div>
+                <label>Husband Name (Nepali)</label
+                ><input type="text" id="divorceHusbandNameNep" />
+              </div>
+              <div>
+                <label>Husband Name (English)</label
+                ><input type="text" id="divorceHusbandNameEng" />
+              </div>
+              <div>
+                <label>Husband Citizenship No</label
+                ><input type="text" id="divorceHusbandCitNo" />
+              </div>
+              <div>
+                <label>Wife Name (Nepali)</label
+                ><input type="text" id="divorceWifeNameNep" />
+              </div>
+              <div>
+                <label>Wife Name (English)</label
+                ><input type="text" id="divorceWifeNameEng" />
+              </div>
+              <div>
+                <label>Wife Citizenship No</label
+                ><input type="text" id="divorceWifeCitNo" />
+              </div>
+              <div>
+                <label>Divorce Date</label
+                ><input type="text" id="divorceDate" />
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="generateDivorcePDF()">
+              Generate Divorce Certificate PDF
+            </button>
+          </div>
+        </div>
+
+        <!-- ==================== MIGRATION PAGE ==================== -->
+        <!--migration-->
+        <div id="migrationPage" class="service-page hidden">
+          <button
+            class="btn btn-secondary back-btn"
+            onclick="backToDashboard()"
+          >
+            ← Cancel / Back
+          </button>
+          <h1>बसाइँसराइ प्रमाणपत्र</h1>
+
+          <div id="migrationStep1" class="card">
+            <h2>1. Upload Applicant Primary Citizenship (Front & Back)</h2>
+            <div class="image-upload-area">
+              <label>Citizenship Front</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadMigrationImage(event, 'primaryFront')"
+              />
+              <img
+                id="migrationPrimaryFrontPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <div class="image-upload-area">
+              <label>Citizenship Back</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadMigrationImage(event, 'primaryBack')"
+              />
+              <img
+                id="migrationPrimaryBackPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <button
+              id="migrationNextToNibidak"
+              class="btn btn-primary"
+              disabled
+            >
+              Next: Nibidak Card
+            </button>
+          </div>
+
+          <div id="migrationStep2" class="card hidden">
+            <h2>
+              2. Upload Nibidak Citizenship Card (Front & Back) - COMPULSORY
+            </h2>
+            <div class="image-upload-area">
+              <label>Nibidak Citizenship Front</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadMigrationImage(event, 'nibidakFront')"
+              />
+              <img
+                id="migrationNibidakFrontPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <div class="image-upload-area">
+              <label>Nibidak Citizenship Back</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadMigrationImage(event, 'nibidakBack')"
+              />
+              <img
+                id="migrationNibidakBackPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <p class="upload-hint">
+              Nibidak (Applicant) citizenship card is required
+            </p>
+            <button id="migrationNextToOCR" class="btn btn-primary" disabled>
+              Next: OCR
+            </button>
+          </div>
+
+          <div id="migrationStep3" class="card hidden">
+            <h2>3. Extract Information (OCR)</h2>
+            <div class="ocr-actions">
+              <button class="btn btn-success" onclick="runMigrationOCR()">
+                🔍 Run OCR
+              </button>
+              <button
+                class="btn btn-secondary"
+                onclick="showServiceStep('migration', 4)"
+              >
+                ✏️ Skip OCR → Fill Manually
+              </button>
+            </div>
+            <p class="skip-ocr-hint">
+              OCR auto-fills applicant details from uploaded card. You may skip
+              and enter details manually.
+            </p>
+          </div>
+
+          <div id="migrationStep4" class="card hidden">
+            <h2>4. Migration Details Form</h2>
+            <div class="form-grid">
+              <div>
+                <label>Name (Nepali)</label
+                ><input type="text" id="migrationNameNep" />
+              </div>
+              <div>
+                <label>Name (English)</label
+                ><input type="text" id="migrationNameEng" />
+              </div>
+              <div>
+                <label>Citizenship No</label
+                ><input type="text" id="migrationCitNo" />
+              </div>
+              <div>
+                <label>From Location</label
+                ><input type="text" id="migrationFromLocation" />
+              </div>
+              <div>
+                <label>To Location</label
+                ><input type="text" id="migrationToLocation" />
+              </div>
+              <div>
+                <label>Migration Date</label
+                ><input type="text" id="migrationDate" />
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="generateMigrationPDF()">
+              Generate Migration Certificate PDF
+            </button>
+          </div>
+        </div>
+
+        <!-- ==================== RELATIONSHIP PAGE ==================== -->
+        <div id="relationshipPage" class="service-page hidden">
+          <button
+            class="btn btn-secondary back-btn"
+            onclick="backToDashboard()"
+          >
+            ← Cancel / Back
+          </button>
+          <h1>नाता प्रमाणपत्र</h1>
+
+          <div id="relationshipStep1" class="card">
+            <h2>1. Upload Applicant Citizenship (Front & Back)</h2>
+            <div class="image-upload-area">
+              <label>Citizenship Front</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadRelationshipImage(event, 'documentFront')"
+              />
+              <img
+                id="relationshipDocumentFrontPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <div class="image-upload-area">
+              <label>Citizenship Back</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadRelationshipImage(event, 'documentBack')"
+              />
+              <img
+                id="relationshipDocumentBackPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <button
+              id="relationshipNextToNibidak"
+              class="btn btn-primary"
+              disabled
+            >
+              Next: Nibidak Card
+            </button>
+          </div>
+
+          <div id="relationshipStep2" class="card hidden">
+            <h2>2. Upload Nibidak Card (Front & Back) - COMPULSORY</h2>
+            <div class="image-upload-area">
+              <label>Nibidak Citizenship Front</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadRelationshipImage(event, 'nibidakFront')"
+              />
+              <img
+                id="relationshipNibidakFrontPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <div class="image-upload-area">
+              <label>Nibidak Citizenship Back</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadRelationshipImage(event, 'nibidakBack')"
+              />
+              <img
+                id="relationshipNibidakBackPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <button id="relationshipNextToOCR" class="btn btn-primary" disabled>
+              Next: OCR
+            </button>
+          </div>
+
+          <div id="relationshipStep3" class="card hidden">
+            <h2>3. Extract Information (OCR)</h2>
+            <div class="ocr-actions">
+              <button class="btn btn-success" onclick="runRelationshipOCR()">
+                🔍 Run OCR
+              </button>
+              <button
+                class="btn btn-secondary"
+                onclick="showServiceStep('relationship', 4)"
+              >
+                ✏️ Skip OCR → Fill Manually
+              </button>
+            </div>
+            <p class="skip-ocr-hint">
+              OCR auto-fills applicant details from uploaded card. You may skip
+              and enter details manually.
+            </p>
+          </div>
+
+          <div id="relationshipStep4" class="card hidden">
+            <h2>4. Relationship Details Form</h2>
+            <div class="form-grid">
+              <div>
+                <label>Applicant Name (Nepali)</label
+                ><input type="text" id="relationshipNameNep" />
+              </div>
+              <div>
+                <label>Applicant Name (English)</label
+                ><input type="text" id="relationshipNameEng" />
+              </div>
+              <div>
+                <label>Relationship Type</label
+                ><select id="relationshipType">
+                  <option>Brother</option>
+                  <option>Sister</option>
+                  <option>Parent</option>
+                  <option>Child</option>
+                  <option>Spouse</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div>
+                <label>Related Person Name</label
+                ><input type="text" id="relationshipRelatedName" />
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="generateRelationshipPDF()">
+              Generate Relationship Certificate PDF
+            </button>
+          </div>
+        </div>
+
+        <!-- ==================== INCOME PAGE ==================== -->
+        <div id="incomePage" class="service-page hidden">
+          <button
+            class="btn btn-secondary back-btn"
+            onclick="backToDashboard()"
+          >
+            ← Cancel / Back
+          </button>
+          <h1>आय प्रमाणपत्र</h1>
+
+          <div id="incomeStep1" class="card">
+            <h2>1. Upload Citizenship Card (Front & Back)</h2>
+            <div class="image-upload-area">
+              <label>Citizenship Front</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadIncomeImage(event, 'documentFront')"
+              />
+              <img
+                id="incomeDocumentFrontPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <div class="image-upload-area">
+              <label>Citizenship Back</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadIncomeImage(event, 'documentBack')"
+              />
+              <img
+                id="incomeDocumentBackPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <button id="incomeNextToNibidak" class="btn btn-primary" disabled>
+              Next: Nibidak Card
+            </button>
+          </div>
+
+          <div id="incomeStep2" class="card hidden">
+            <h2>2. Upload Nibidak Card (Front & Back) - COMPULSORY</h2>
+            <div class="image-upload-area">
+              <label>Nibidak Citizenship Front</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadIncomeImage(event, 'nibidakFront')"
+              />
+              <img
+                id="incomeNibidakFrontPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <div class="image-upload-area">
+              <label>Nibidak Citizenship Back</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadIncomeImage(event, 'nibidakBack')"
+              />
+              <img
+                id="incomeNibidakBackPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <button id="incomeNextToOCR" class="btn btn-primary" disabled>
+              Next: OCR
+            </button>
+          </div>
+
+          <div id="incomeStep3" class="card hidden">
+            <h2>3. Extract Information (OCR)</h2>
+            <div class="ocr-actions">
+              <button class="btn btn-success" onclick="runIncomeOCR()">
+                🔍 Run OCR
+              </button>
+              <button
+                class="btn btn-secondary"
+                onclick="showServiceStep('income', 4)"
+              >
+                ✏️ Skip OCR → Fill Manually
+              </button>
+            </div>
+            <p class="skip-ocr-hint">
+              OCR auto-fills applicant details from uploaded card. You may skip
+              and enter details manually.
+            </p>
+          </div>
+
+          <div id="incomeStep4" class="card hidden">
+            <h2>4. Income Details Form</h2>
+            <div class="form-grid">
+              <div>
+                <label>Name (Nepali)</label
+                ><input type="text" id="incomeNameNep" />
+              </div>
+              <div>
+                <label>Name (English)</label
+                ><input type="text" id="incomeNameEng" />
+              </div>
+              <div>
+                <label>Annual Income</label
+                ><input type="text" id="incomeAnnualIncome" />
+              </div>
+              <div>
+                <label>Income Source</label
+                ><input type="text" id="incomeSource" />
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="generateIncomePDF()">
+              Generate Income Certificate PDF
+            </button>
+          </div>
+        </div>
+
+        <!-- ==================== PROPERTY PAGE ==================== -->
+        <div id="propertyPage" class="service-page hidden">
+          <button
+            class="btn btn-secondary back-btn"
+            onclick="backToDashboard()"
+          >
+            ← Cancel / Back
+          </button>
+          <h1>सम्पत्ति मूल्यांकन प्रमाणपत्र</h1>
+
+          <div id="propertyStep1" class="card">
+            <h2>1. Upload Citizenship Card (Front & Back)</h2>
+            <div class="image-upload-area">
+              <label>Citizenship Front</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadPropertyImage(event, 'documentFront')"
+              />
+              <img
+                id="propertyDocumentFrontPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <div class="image-upload-area">
+              <label>Citizenship Back</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadPropertyImage(event, 'documentBack')"
+              />
+              <img
+                id="propertyDocumentBackPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <button id="propertyNextToNibidak" class="btn btn-primary" disabled>
+              Next: Nibidak Card
+            </button>
+          </div>
+
+          <div id="propertyStep2" class="card hidden">
+            <h2>2. Upload Nibidak Card (Front & Back) - COMPULSORY</h2>
+            <div class="image-upload-area">
+              <label>Nibidak Citizenship Front</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadPropertyImage(event, 'nibidakFront')"
+              />
+              <img
+                id="propertyNibidakFrontPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <div class="image-upload-area">
+              <label>Nibidak Citizenship Back</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadPropertyImage(event, 'nibidakBack')"
+              />
+              <img
+                id="propertyNibidakBackPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <button id="propertyNextToOCR" class="btn btn-primary" disabled>
+              Next: OCR
+            </button>
+          </div>
+
+          <div id="propertyStep3" class="card hidden">
+            <h2>3. Extract Information (OCR)</h2>
+            <div class="ocr-actions">
+              <button class="btn btn-success" onclick="runPropertyOCR()">
+                🔍 Run OCR
+              </button>
+              <button
+                class="btn btn-secondary"
+                onclick="showServiceStep('property', 4)"
+              >
+                ✏️ Skip OCR → Fill Manually
+              </button>
+            </div>
+            <p class="skip-ocr-hint">
+              OCR auto-fills owner details from uploaded card. You may skip and
+              enter details manually.
+            </p>
+          </div>
+
+          <div id="propertyStep4" class="card hidden">
+            <h2>4. Property Details Form</h2>
+            <div class="form-grid">
+              <div>
+                <label>Owner Name (Nepali)</label
+                ><input type="text" id="propertyOwnerNameNep" />
+              </div>
+              <div>
+                <label>Owner Name (English)</label
+                ><input type="text" id="propertyOwnerNameEng" />
+              </div>
+              <div>
+                <label>Property Location</label
+                ><input type="text" id="propertyLocation" />
+              </div>
+              <div>
+                <label>Property Value</label
+                ><input type="text" id="propertyValue" />
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="generatePropertyPDF()">
+              Generate Property Certificate PDF
+            </button>
+          </div>
+        </div>
+
+        <!-- ==================== TAX PAGE ==================== -->
+        <div id="taxPage" class="service-page hidden">
+          <button
+            class="btn btn-secondary back-btn"
+            onclick="backToDashboard()"
+          >
+            ← Cancel / Back
+          </button>
+          <h1>कर चुक्ता प्रमाणपत्र</h1>
+
+          <div id="taxStep1" class="card">
+            <h2>1. Upload Citizenship Card (Front & Back)</h2>
+            <div class="image-upload-area">
+              <label>Citizenship Front</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadTaxImage(event, 'documentFront')"
+              />
+              <img
+                id="taxDocumentFrontPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <div class="image-upload-area">
+              <label>Citizenship Back</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadTaxImage(event, 'documentBack')"
+              />
+              <img
+                id="taxDocumentBackPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <button id="taxNextToNibidak" class="btn btn-primary" disabled>
+              Next: Nibidak Card
+            </button>
+          </div>
+
+          <div id="taxStep2" class="card hidden">
+            <h2>2. Upload Nibidak Card (Front & Back) - COMPULSORY</h2>
+            <div class="image-upload-area">
+              <label>Nibidak Citizenship Front</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadTaxImage(event, 'nibidakFront')"
+              />
+              <img
+                id="taxNibidakFrontPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <div class="image-upload-area">
+              <label>Nibidak Citizenship Back</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadTaxImage(event, 'nibidakBack')"
+              />
+              <img
+                id="taxNibidakBackPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <button id="taxNextToOCR" class="btn btn-primary" disabled>
+              Next: OCR
+            </button>
+          </div>
+
+          <div id="taxStep3" class="card hidden">
+            <h2>3. Extract Information (OCR)</h2>
+            <div class="ocr-actions">
+              <button class="btn btn-success" onclick="runTaxOCR()">
+                🔍 Run OCR
+              </button>
+              <button
+                class="btn btn-secondary"
+                onclick="showServiceStep('tax', 4)"
+              >
+                ✏️ Skip OCR → Fill Manually
+              </button>
+            </div>
+            <p class="skip-ocr-hint">
+              OCR auto-fills taxpayer details from uploaded card. You may skip
+              and enter details manually.
+            </p>
+          </div>
+
+          <div id="taxStep4" class="card hidden">
+            <h2>4. Tax Payment Details Form</h2>
+            <div class="form-grid">
+              <div>
+                <label>Taxpayer Name (Nepali)</label
+                ><input type="text" id="taxPayerNameNep" />
+              </div>
+              <div>
+                <label>Taxpayer Name (English)</label
+                ><input type="text" id="taxPayerNameEng" />
+              </div>
+              <div>
+                <label>Tax Paid Amount</label
+                ><input type="text" id="taxPaidAmount" />
+              </div>
+              <div>
+                <label>Payment Year</label
+                ><input type="text" id="taxPaymentYear" />
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="generateTaxPDF()">
+              Generate Tax Certificate PDF
+            </button>
+          </div>
+        </div>
+
+        <!-- ==================== ADDRESS PAGE ==================== -->
+        <div id="addressPage" class="service-page hidden">
+          <button
+            class="btn btn-secondary back-btn"
+            onclick="backToDashboard()"
+          >
+            ← Cancel / Back
+          </button>
+          <h1>ठेगाना प्रमाणपत्र</h1>
+
+          <div id="addressStep1" class="card">
+            <h2>1. Upload Citizenship Card (Front & Back)</h2>
+            <div class="image-upload-area">
+              <label>Citizenship Front</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadAddressImage(event, 'documentFront')"
+              />
+              <img
+                id="addressDocumentFrontPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <div class="image-upload-area">
+              <label>Citizenship Back</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadAddressImage(event, 'documentBack')"
+              />
+              <img
+                id="addressDocumentBackPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <button id="addressNextToNibidak" class="btn btn-primary" disabled>
+              Next: Nibidak Card
+            </button>
+          </div>
+
+          <div id="addressStep2" class="card hidden">
+            <h2>2. Upload Nibidak Card (Front & Back) - COMPULSORY</h2>
+            <div class="image-upload-area">
+              <label>Nibidak Citizenship Front</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadAddressImage(event, 'nibidakFront')"
+              />
+              <img
+                id="addressNibidakFrontPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <div class="image-upload-area">
+              <label>Nibidak Citizenship Back</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadAddressImage(event, 'nibidakBack')"
+              />
+              <img
+                id="addressNibidakBackPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <button id="addressNextToOCR" class="btn btn-primary" disabled>
+              Next: OCR
+            </button>
+          </div>
+
+          <div id="addressStep3" class="card hidden">
+            <h2>3. Extract Information (OCR)</h2>
+            <div class="ocr-actions">
+              <button class="btn btn-success" onclick="runAddressOCR()">
+                🔍 Run OCR
+              </button>
+              <button
+                class="btn btn-secondary"
+                onclick="showServiceStep('address', 4)"
+              >
+                ✏️ Skip OCR → Fill Manually
+              </button>
+            </div>
+            <p class="skip-ocr-hint">
+              OCR auto-fills address details from uploaded card. You may skip
+              and enter details manually.
+            </p>
+          </div>
+
+          <div id="addressStep4" class="card hidden">
+            <h2>4. Address Details Form</h2>
+            <div class="form-grid">
+              <div class="full-width">
+                <label>Full Name</label
+                ><input type="text" id="addressFullName" />
+              </div>
+              <div class="full-width">
+                <label>Permanent Address</label
+                ><textarea id="addressPermanent" rows="2"></textarea>
+              </div>
+              <div>
+                <label>Ward No</label><input type="text" id="addressWardNo" />
+              </div>
+              <div>
+                <label>Municipality</label
+                ><input type="text" id="addressMunicipality" />
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="generateAddressPDF()">
+              Generate Address Certificate PDF
+            </button>
+          </div>
+        </div>
+
+        <!-- ==================== UNMARRIED PAGE ==================== -->
+        <div id="unmarriedPage" class="service-page hidden">
+          <button
+            class="btn btn-secondary back-btn"
+            onclick="backToDashboard()"
+          >
+            ← Cancel / Back
+          </button>
+          <h1>अविवाहित प्रमाणपत्र</h1>
+
+          <div id="unmarriedStep1" class="card">
+            <h2>1. Upload Citizenship Card (Front & Back)</h2>
+            <div class="image-upload-area">
+              <label>Citizenship Front</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadUnmarriedImage(event, 'documentFront')"
+              />
+              <img
+                id="unmarriedDocumentFrontPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <div class="image-upload-area">
+              <label>Citizenship Back</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadUnmarriedImage(event, 'documentBack')"
+              />
+              <img
+                id="unmarriedDocumentBackPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <button
+              id="unmarriedNextToNibidak"
+              class="btn btn-primary"
+              disabled
+            >
+              Next: Nibidak Card
+            </button>
+          </div>
+
+          <div id="unmarriedStep2" class="card hidden">
+            <h2>2. Upload Nibidak Card (Front & Back) - COMPULSORY</h2>
+            <div class="image-upload-area">
+              <label>Nibidak Citizenship Front</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadUnmarriedImage(event, 'nibidakFront')"
+              />
+              <img
+                id="unmarriedNibidakFrontPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <div class="image-upload-area">
+              <label>Nibidak Citizenship Back</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadUnmarriedImage(event, 'nibidakBack')"
+              />
+              <img
+                id="unmarriedNibidakBackPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <button id="unmarriedNextToOCR" class="btn btn-primary" disabled>
+              Next: OCR
+            </button>
+          </div>
+
+          <div id="unmarriedStep3" class="card hidden">
+            <h2>3. Extract Information (OCR)</h2>
+            <div class="ocr-actions">
+              <button class="btn btn-success" onclick="runUnmarriedOCR()">
+                🔍 Run OCR
+              </button>
+              <button
+                class="btn btn-secondary"
+                onclick="showServiceStep('unmarried', 4)"
+              >
+                ✏️ Skip OCR → Fill Manually
+              </button>
+            </div>
+            <p class="skip-ocr-hint">
+              OCR auto-fills applicant details from uploaded card. You may skip
+              and enter details manually.
+            </p>
+          </div>
+
+          <div id="unmarriedStep4" class="card hidden">
+            <h2>4. Unmarried Status Form</h2>
+            <div class="form-grid">
+              <div>
+                <label>Name (Nepali)</label
+                ><input type="text" id="unmarriedNameNep" />
+              </div>
+              <div>
+                <label>Name (English)</label
+                ><input type="text" id="unmarriedNameEng" />
+              </div>
+              <div>
+                <label>Age</label><input type="number" id="unmarriedAge" />
+              </div>
+              <div>
+                <label>Gender</label
+                ><select id="unmarriedGender">
+                  <option>Male</option>
+                  <option>Female</option>
+                  <option>Other</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="generateUnmarriedPDF()">
+              Generate Unmarried Certificate PDF
+            </button>
+          </div>
+        </div>
+
+        <!-- ==================== CHARACTER PAGE ==================== -->
+        <div id="characterPage" class="service-page hidden">
+          <button
+            class="btn btn-secondary back-btn"
+            onclick="backToDashboard()"
+          >
+            ← Cancel / Back
+          </button>
+          <h1>चरित्र प्रमाणपत्र</h1>
+
+          <div id="characterStep1" class="card">
+            <h2>1. Upload Citizenship Card (Front & Back)</h2>
+            <div class="image-upload-area">
+              <label>Citizenship Front</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadCharacterImage(event, 'documentFront')"
+              />
+              <img
+                id="characterDocumentFrontPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <div class="image-upload-area">
+              <label>Citizenship Back</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadCharacterImage(event, 'documentBack')"
+              />
+              <img
+                id="characterDocumentBackPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <button
+              id="characterNextToNibidak"
+              class="btn btn-primary"
+              disabled
+            >
+              Next: Nibidak Card
+            </button>
+          </div>
+
+          <div id="characterStep2" class="card hidden">
+            <h2>2. Upload Nibidak Card (Front & Back) - COMPULSORY</h2>
+            <div class="image-upload-area">
+              <label>Nibidak Citizenship Front</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadCharacterImage(event, 'nibidakFront')"
+              />
+              <img
+                id="characterNibidakFrontPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <div class="image-upload-area">
+              <label>Nibidak Citizenship Back</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadCharacterImage(event, 'nibidakBack')"
+              />
+              <img
+                id="characterNibidakBackPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <button id="characterNextToOCR" class="btn btn-primary" disabled>
+              Next: OCR
+            </button>
+          </div>
+
+          <div id="characterStep3" class="card hidden">
+            <h2>3. Extract Information (OCR)</h2>
+            <div class="ocr-actions">
+              <button class="btn btn-success" onclick="runCharacterOCR()">
+                🔍 Run OCR
+              </button>
+              <button
+                class="btn btn-secondary"
+                onclick="showServiceStep('character', 4)"
+              >
+                ✏️ Skip OCR → Fill Manually
+              </button>
+            </div>
+            <p class="skip-ocr-hint">
+              OCR auto-fills applicant details from uploaded card. You may skip
+              and enter details manually.
+            </p>
+          </div>
+
+          <div id="characterStep4" class="card hidden">
+            <h2>4. Character Details Form</h2>
+            <div class="form-grid">
+              <div>
+                <label>Name (Nepali)</label
+                ><input type="text" id="characterNameNep" />
+              </div>
+              <div>
+                <label>Name (English)</label
+                ><input type="text" id="characterNameEng" />
+              </div>
+              <div>
+                <label>Character Description</label
+                ><textarea id="characterDescription" rows="2"></textarea>
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="generateCharacterPDF()">
+              Generate Character Certificate PDF
+            </button>
+          </div>
+        </div>
+
+        <!-- ==================== ROAD PAGE ==================== -->
+        <div id="roadPage" class="service-page hidden">
+          <button
+            class="btn btn-secondary back-btn"
+            onclick="backToDashboard()"
+          >
+            ← Cancel / Back
+          </button>
+          <h1>रोड नाप प्रमाणपत्र</h1>
+
+          <div id="roadStep1" class="card">
+            <h2>1. Upload Applicant Citizenship Card (Front & Back)</h2>
+            <div class="image-upload-area">
+              <label>Citizenship Front</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadRoadImage(event, 'documentFront')"
+              />
+              <img
+                id="roadDocumentFrontPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <div class="image-upload-area">
+              <label>Citizenship Back</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadRoadImage(event, 'documentBack')"
+              />
+              <img
+                id="roadDocumentBackPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <button id="roadNextToNibidak" class="btn btn-primary" disabled>
+              Next: Nibidak Card
+            </button>
+          </div>
+
+          <div id="roadStep2" class="card hidden">
+            <h2>2. Upload Nibidak Card (Front & Back) - COMPULSORY</h2>
+            <div class="image-upload-area">
+              <label>Nibidak Citizenship Front</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadRoadImage(event, 'nibidakFront')"
+              />
+              <img
+                id="roadNibidakFrontPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <div class="image-upload-area">
+              <label>Nibidak Citizenship Back</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadRoadImage(event, 'nibidakBack')"
+              />
+              <img
+                id="roadNibidakBackPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <button id="roadNextToOCR" class="btn btn-primary" disabled>
+              Next: OCR
+            </button>
+          </div>
+
+          <div id="roadStep3" class="card hidden">
+            <h2>3. Extract Information (OCR)</h2>
+            <div class="ocr-actions">
+              <button class="btn btn-success" onclick="runRoadOCR()">
+                🔍 Run OCR
+              </button>
+              <button
+                class="btn btn-secondary"
+                onclick="showServiceStep('road', 4)"
+              >
+                ✏️ Skip OCR → Fill Manually
+              </button>
+            </div>
+            <p class="skip-ocr-hint">
+              OCR auto-fills applicant details from uploaded card. You may skip
+              and enter details manually.
+            </p>
+          </div>
+
+          <div id="roadStep4" class="card hidden">
+            <h2>4. Road Details Form</h2>
+            <div class="form-grid">
+              <div>
+                <label>Applicant Name (Nepali)</label
+                ><input type="text" id="roadApplicantNameNep" />
+              </div>
+              <div>
+                <label>Applicant Name (English)</label
+                ><input type="text" id="roadApplicantNameEng" />
+              </div>
+              <div>
+                <label>Road Name</label><input type="text" id="roadName" />
+              </div>
+              <div>
+                <label>Road Width</label><input type="text" id="roadWidth" />
+              </div>
+              <div class="full-width">
+                <label>Road Location</label
+                ><textarea id="roadLocation" rows="2"></textarea>
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="generateRoadPDF()">
+              Generate Road Certificate PDF
+            </button>
+          </div>
+        </div>
+
+        <!-- ==================== OTHER FORM PAGE ==================== -->
+        <div id="otherFormPage" class="service-page hidden">
+          <button
+            class="btn btn-secondary back-btn"
+            onclick="backToDashboard()"
+          >
+            â† Cancel / Back
+          </button>
+          <h1>à¤…à¤¨à¥ à¤¯ à¤¸à¤¿à¤«à¤¾à¤°à¤¿à¤¸ à¤ªà¤¤à¥ à¤°</h1>
+
+          <div id="otherFormStep1" class="card">
+            <h2>1. Upload Applicant Citizenship Card (Front & Back)</h2>
+            <div class="image-upload-area">
+              <label>Citizenship Front</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadOtherFormImage(event, 'documentFront')"
+              />
+              <img
+                id="otherFormDocumentFrontPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <div class="image-upload-area">
+              <label>Citizenship Back</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadOtherFormImage(event, 'documentBack')"
+              />
+              <img
+                id="otherFormDocumentBackPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <button
+              id="otherFormNextToNibidak"
+              class="btn btn-primary"
+              disabled
+            >
+              Next: Nibidak Card
+            </button>
+          </div>
+
+          <div id="otherFormStep2" class="card hidden">
+            <h2>2. Upload Nibidak Card (Front & Back) - COMPULSORY</h2>
+            <div class="image-upload-area">
+              <label>Nibidak Citizenship Front</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadOtherFormImage(event, 'nibidakFront')"
+              />
+              <img
+                id="otherFormNibidakFrontPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <div class="image-upload-area">
+              <label>Nibidak Citizenship Back</label>
+              <input
+                type="file"
+                accept="image/*"
+                onchange="loadOtherFormImage(event, 'nibidakBack')"
+              />
+              <img
+                id="otherFormNibidakBackPreview"
+                class="preview-image"
+                style="display: none"
+              />
+            </div>
+            <button id="otherFormNextToOCR" class="btn btn-primary" disabled>
+              Next: OCR
+            </button>
+          </div>
+
+          <div id="otherFormStep3" class="card hidden">
+            <h2>3. Extract Information (OCR)</h2>
+            <div class="ocr-actions">
+              <button class="btn btn-success" onclick="runOtherFormOCR()">
+                🔍 Run OCR
+              </button>
+              <button
+                class="btn btn-secondary"
+                onclick="showServiceStep('otherForm', 4)"
+              >
+                ✏️ Skip OCR → Fill Manually
+              </button>
+            </div>
+            <p class="skip-ocr-hint">
+              OCR auto-fills applicant details from uploaded card. You may skip
+              and enter details manually.
+            </p>
+          </div>
+
+          <div id="otherFormStep4" class="card hidden">
+            <h2>4. Other Recommendation Form</h2>
+            <div class="form-grid">
+              <div>
+                <label>Applicant Name (Nepali)</label
+                ><input type="text" id="otherFormApplicantNameNep" />
+              </div>
+              <div>
+                <label>Applicant Name (English)</label
+                ><input type="text" id="otherFormApplicantNameEng" />
+              </div>
+              <div>
+                <label>Recommendation Subject</label
+                ><input
+                  type="text"
+                  id="otherFormSubject"
+                  placeholder="Enter service subject"
+                />
+              </div>
+              <div>
+                <label>Reference Number</label
+                ><input
+                  type="text"
+                  id="otherFormReferenceNo"
+                  placeholder="Optional"
+                />
+              </div>
+              <div class="full-width">
+                <label>Purpose / Description</label
+                ><textarea
+                  id="otherFormPurpose"
+                  rows="3"
+                  placeholder="Describe the recommendation details"
+                ></textarea>
+              </div>
+              <div class="full-width">
+                <label>Remarks</label
+                ><textarea
+                  id="otherFormRemarks"
+                  rows="2"
+                  placeholder="Optional remarks"
+                ></textarea>
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="generateOtherFormPDF()">
+              Generate Other Recommendation PDF
+            </button>
+          </div>
+        </div>
+
+        <!---->
+      </div>
+    </div>
+  </body>
+</html>
